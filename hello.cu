@@ -6,6 +6,7 @@ __global__ void mykernel(){
 }
 
 void hello(){
+	cudaSetDevice(0);
     mykernel<<<1,1>>>();
     cudaDeviceSynchronize();
     CHECK_ERROR(cudaGetLastError());
