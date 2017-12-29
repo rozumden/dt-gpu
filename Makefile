@@ -5,4 +5,4 @@ all:
 	nvcc -arch sm_20 -c -I. distance-transform.cu -o distance-transform.cu.o
 	make link
 link:
-	g++ -o exec hello.cu.o local-maxima.cu.o distance-transform.cu.o init.h main.cpp.o -I/usr/local/cuda/include -lcudart
+	g++ -o exec hello.cu.o local-maxima.cu.o distance-transform.cu.o init.h main.cpp.o -L/usr/local/cuda/lib64 -I/usr/local/cuda/include -lcudart
