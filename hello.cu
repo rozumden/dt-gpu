@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "init.h"
 
 __global__ void mykernel(){
     printf("Hello from GPU!\n");
@@ -7,4 +8,5 @@ __global__ void mykernel(){
 void hello(){
     mykernel<<<1,1>>>();
     cudaDeviceSynchronize();
+    CHECK_ERROR(cudaGetLastError());
 }
