@@ -7,7 +7,9 @@ __global__ void mykernel(){
 
 void hello(){
 	cudaSetDevice(0);
+    CHECK_ERROR(cudaGetLastError());
     mykernel<<<1,1>>>();
+    CHECK_ERROR(cudaGetLastError());
     cudaDeviceSynchronize();
     CHECK_ERROR(cudaGetLastError());
 }
