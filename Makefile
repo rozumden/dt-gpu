@@ -16,5 +16,11 @@ all5:
 	nvcc -arch sm_50 -c -I. local-maxima.cu -o local-maxima.cu.o
 	nvcc -arch sm_50 -c -I. distance-transform.cu -o distance-transform.cu.o
 	make link
+all62:
+	g++ -c -I. main.cpp -o main.cpp.o
+	nvcc -arch sm_62 -c -I. hello.cu -o hello.cu.o
+	nvcc -arch sm_62 -c -I. local-maxima.cu -o local-maxima.cu.o
+	nvcc -arch sm_62 -c -I. distance-transform.cu -o distance-transform.cu.o
+	make link
 link:
 	g++ -o exec hello.cu.o local-maxima.cu.o distance-transform.cu.o init.h main.cpp.o -L/usr/local/cuda/lib64 -I/usr/local/cuda/include -lcudart
