@@ -4,7 +4,7 @@ all2:
 	nvcc -arch sm_20 -c -I. local-maxima.cu -o local-maxima.cu.o
 	nvcc -arch sm_20 -c -I. distance-transform.cu -o distance-transform.cu.o
 	make link
-all5:
+all35:
 	g++ -c -I. main.cpp -o main.cpp.o
 	nvcc -arch sm_35 -c -I. hello.cu -o hello.cu.o
 	nvcc -arch sm_35 -c -I. local-maxima.cu -o local-maxima.cu.o
