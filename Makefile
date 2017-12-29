@@ -6,6 +6,12 @@ all2:
 	make link
 all5:
 	g++ -c -I. main.cpp -o main.cpp.o
+	nvcc -arch sm_35 -c -I. hello.cu -o hello.cu.o
+	nvcc -arch sm_35 -c -I. local-maxima.cu -o local-maxima.cu.o
+	nvcc -arch sm_35 -c -I. distance-transform.cu -o distance-transform.cu.o
+	make link
+all5:
+	g++ -c -I. main.cpp -o main.cpp.o
 	nvcc -arch sm_50 -c -I. hello.cu -o hello.cu.o
 	nvcc -arch sm_50 -c -I. local-maxima.cu -o local-maxima.cu.o
 	nvcc -arch sm_50 -c -I. distance-transform.cu -o distance-transform.cu.o
