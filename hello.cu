@@ -5,8 +5,8 @@ __global__ void mykernel(){
     printf("Hello from GPU!\n");
 }
 
-void hello(){
-	cudaSetDevice(0);
+void hello(int dev){
+	cudaSetDevice(dev);
     CHECK_ERROR(cudaGetLastError());
     mykernel<<<1,1>>>();
     CHECK_ERROR(cudaGetLastError());
