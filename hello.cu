@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "init.h"
+#include "init.cu"
 
 __global__ void mykernel(){
     printf("Hello from GPU!\n");

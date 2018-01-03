@@ -1,26 +1,19 @@
-all2:
-	g++ -c -I. main.cpp -o main.cpp.o
-	nvcc -arch sm_20 -c -I. hello.cu -o hello.cu.o
-	nvcc -arch sm_20 -c -I. local-maxima.cu -o local-maxima.cu.o
-	nvcc -arch sm_20 -c -I. distance-transform.cu -o distance-transform.cu.o
-	make link
-all35:
-	g++ -c -I. main.cpp -o main.cpp.o
-	nvcc -arch sm_35 -c -I. hello.cu -o hello.cu.o
-	nvcc -arch sm_35 -c -I. local-maxima.cu -o local-maxima.cu.o
-	nvcc -arch sm_35 -c -I. distance-transform.cu -o distance-transform.cu.o
-	make link
-all5:
-	g++ -c -I. main.cpp -o main.cpp.o
-	nvcc -arch sm_50 -c -I. hello.cu -o hello.cu.o
-	nvcc -arch sm_50 -c -I. local-maxima.cu -o local-maxima.cu.o
-	nvcc -arch sm_50 -c -I. distance-transform.cu -o distance-transform.cu.o
-	make link
-all62:
-	g++ -c -I. main.cpp -o main.cpp.o
-	nvcc -arch sm_62 -c -I. hello.cu -o hello.cu.o
-	nvcc -arch sm_62 -c -I. local-maxima.cu -o local-maxima.cu.o
-	nvcc -arch sm_62 -c -I. distance-transform.cu -o distance-transform.cu.o
-	make link
-link:
-	g++ -o exec hello.cu.o local-maxima.cu.o distance-transform.cu.o init.h main.cpp.o -L/usr/local/cuda/lib64 -I/usr/local/cuda/include -lcudart
+all:
+	g++ -std=c++11 -c -I. main.cpp -o main.cpp.o
+	g++ -std=c++11 -c -I. processing-gpu.cpp -o processing-gpu.cpp.o
+	/usr/local/cuda/bin/nvcc -arch sm_21 -c -I. local-maxima.cu -o local-maxima.cu.o
+	/usr/local/cuda/bin/nvcc -arch sm_21 -c -I. distance-transform.cu -o distance-transform.cu.o
+	/usr/local/cuda/bin/nvcc -arch sm_21 -c -I. distance-transform-5x5.cu -o distance-transform-5x5.cu.o
+	/usr/local/cuda/bin/nvcc -arch sm_21 -c -I. distance-transform-fast.cu -o distance-transform-fast.cu.o
+	g++ -std=c++11 -o exec local-maxima.cu.o distance-transform.cu.o \
+		 distance-transform-5x5.cu.o distance-transform-fast.cu.o \
+		 init.h processing-gpu.cpp.o main.cpp.o \
+		-L/usr/local/cuda/lib64 \
+		-I/usr/local/cuda/include -lcudart -I/usr/local/include  -L/usr/local/lib \
+		`pkg-config --libs opencv` \
+		`pkg-config --libs --cflags opencv`
+
+test:
+	g++ -c -I. test.cpp -o test.cpp.o
+	/usr/local/cuda/bin/nvcc -arch sm_20 -c -I. hello.cu -o hello.cu.o
+	g++ -o testgpu hello.cu.o init.h test.cpp.o -L/usr/local/cuda/lib64 -I/usr/local/cuda/include -lcudart -I/usr/local/include  -L/usr/local/lib

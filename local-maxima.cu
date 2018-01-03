@@ -9,34 +9,34 @@ texture<float, cudaTextureType2D, cudaReadModeElementType> texRef;
 cudaArray *cuArray;
 
 __global__ void findLM(BYTE *dst, int w, int h){
-    float col = blockIdx.x*blockDim.x + threadIdx.x;
-    float row = blockIdx.y*blockDim.y + threadIdx.y;
+    double col = blockIdx.x*blockDim.x + threadIdx.x;
+    double row = blockIdx.y*blockDim.y + threadIdx.y;
     int ind = row * w + col;
-
-    if(ind < w*h) {
+    float eps = 0;
+    if(row < h && col < w) {
         row += 0.5;
         col += 0.5;
         row /= h;
         col /= w;
-        float row1 = 1.f/h;
-        float col1 = 1.f/w;
+        double row1 = 1.f/h;
+        double col1 = 1.f/w;
 
         float inp = tex2D(texRef, col, row);
         if(inp >= 1.5 &&
-           tex2D(texRef, col-col1, row) <= inp &&
-           tex2D(texRef, col-col1, row-row1) <= inp &&
-           tex2D(texRef, col-col1, row+row1) <= inp &&
-           tex2D(texRef, col+col1, row) <= inp &&
-           tex2D(texRef, col+col1, row-row1) <= inp &&
-           tex2D(texRef, col+col1, row+row1) <= inp &&
-           tex2D(texRef, col, row-row1) <= inp &&
-           tex2D(texRef, col, row+row1) <= inp)
+           inp - tex2D(texRef, col-col1, row) >= eps &&
+           inp - tex2D(texRef, col-col1, row-row1) >= eps  &&
+           inp - tex2D(texRef, col-col1, row+row1) >= eps &&
+           inp - tex2D(texRef, col+col1, row) >= eps &&
+           inp - tex2D(texRef, col+col1, row-row1) >= eps &&
+           inp - tex2D(texRef, col+col1, row+row1) >= eps &&
+           inp - tex2D(texRef, col, row-row1) >= eps &&
+           inp - tex2D(texRef, col, row+row1) >= eps)
         {
             dst[ind] = 255;
         } else {
             dst[ind] = 0;
         }
-
+              
     }
 }
 
