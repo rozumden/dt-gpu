@@ -35,10 +35,30 @@ void visualise(cv::Mat &dt, cv::Mat &lm) {
     waitKey(0); // Wait for a keystroke in the window
 }
 
-void test(string name, int distmask, bool vis) {
+void process(string name, int distmask, bool gpu) {
 	Mat image = imread(name, IMREAD_GRAYSCALE);
     Size sz = image.size();
     cout << "Processing image " << name << endl;
+    cout << "width: " << sz.width << ", height: " << sz.height << endl;
+    Mat bin(sz, DataType<unsigned char>::type);
+    threshold(image, bin, 128, 255, cv::THRESH_BINARY);
+    Mat dt(sz, CV_32F);
+    Mat lm(sz, DataType<unsigned char>::type);
+    if(gpu) {
+    	cout << "On GPU..." << endl;
+    	dt_lm_gpu(bin, dt, lm, distmask);
+    } else {
+    	cout << "On CPU..." << endl;
+    	distance_transform(bin, dt, distmask);
+	    local_maxima(dt, lm);
+    }
+    visualise(dt, lm);
+}
+
+void test(string name, int distmask, bool vis) {
+	Mat image = imread(name, IMREAD_GRAYSCALE);
+    Size sz = image.size();
+    cout << "Testing image " << name << endl;
     cout << "width: " << sz.width << ", height: " << sz.height << endl;
 
     Mat bin(sz, DataType<unsigned char>::type);
@@ -90,7 +110,14 @@ void test(string name, int distmask, bool vis) {
 int main(int argc, char const *argv[])
 {
 	if(argc > 1) {
-		test(argv[1], DIST_MASK_5,true);
+		int distmask = DIST_MASK_PRECISE;
+		int gpu = 1;
+		if(argc > 2) 
+			distmask = atoi(argv[2]);
+		if(argc > 3)
+			gpu = atoi(argv[3]);
+		
+		process(argv[1], distmask, gpu);
 		return 0;
 	} 
 

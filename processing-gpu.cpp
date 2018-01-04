@@ -1,5 +1,7 @@
 #include <add-gpu.h>
 #include "include.hpp"
+#include <iostream>
+using namespace std;
 
 void local_maxima_gpu(const cv::Mat& src, cv::Mat& dst) {
     const float* srcData = (const float*) src.data;
@@ -12,12 +14,17 @@ void local_maxima_gpu(const cv::Mat& src, cv::Mat& dst) {
 
 void dt_lm_gpu(const cv::Mat& diff, cv::Mat& dt, cv::Mat &lm, int mask) {
     if(mask == DIST_MASK_3) {
+        cout << "Using 3x3 mask" << endl;
         dt_3x3_lm_gpu(diff, dt, lm);
     } else if(mask == DIST_MASK_5) {
+        cout << "Using 5x5 mask" << endl;
         dt_5x5_lm_gpu(diff, dt, lm);
     } else if(mask == DIST_MASK_PRECISE) {
+        cout << "Using precise mask" << endl;
         dt_fast_gpu(diff, dt);
         local_maxima_gpu(dt, lm);
+    } else {
+        cerr << "Error: Unknown mask!";
     }
 }
 
