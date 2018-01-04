@@ -1,3 +1,17 @@
+//----------------------------------------------------------------------------------------
+/**
+ * \file       init.h
+ * \author     Denys Rozumnyi
+ * \date       2018/01/04
+ * \brief      Initial script for CUDA files
+ *
+ *  This header file includes all common functions and variables for all CUDA sources
+ *	
+*/
+//----------------------------------------------------------------------------------------
+#ifndef _INIT_H_
+#define _INIT_H_
+
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <assert.h>
@@ -19,3 +33,5 @@ static void handleCUDAError(
 }
 
 #define CHECK_ERROR( error ) ( handleCUDAError( error, __FILE__, __LINE__ ) )
+
+#endif // _INIT_H_

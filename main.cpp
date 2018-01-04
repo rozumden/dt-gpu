@@ -3,11 +3,24 @@
 #include <string>
 #include <chrono>
 #include <vector>
-#include "include.hpp"
+#include <include.h>
 using namespace std;
 using namespace cv;
+
+/// number of repetitions of each experiment to average
 #define REPEAT 10
 
+
+/// Visualise distance transform with local maxima using OpenCV.
+/**
+  Create a new drawing context for the drawing window with dimensions width x height of
+  RGB pixels. Allocates additional internal structures for the context (including the
+  depth buffer).
+
+  \param[in] dt   OpenCV float matrix with distance transform values.
+  \param[in] lm   OpenCV 8bit matrix with positive numbers (here 255) indicating local maxima.
+  \return void
+*/
 void visualise(cv::Mat &dt, cv::Mat &lm) {
 	Mat ones(dt.size(), dt.type());
     ones.setTo(1);
@@ -35,6 +48,16 @@ void visualise(cv::Mat &dt, cv::Mat &lm) {
     waitKey(0); // Wait for a keystroke in the window
 }
 
+
+/// Compute and visualise distance transform with local maxima using OpenCV.
+/**
+  Wrapper for general distance tranform + local maxima computation.
+
+  \param[in] name         String indicating image to process
+  \param[in] distmask     Used mask (0 - precise, 3 - 3x3, 5 - 5x5).
+  \param[in] gpu          0 - use CPU, else - use GPU 
+  \return void
+*/
 void process(string name, int distmask, bool gpu) {
 	Mat image = imread(name, IMREAD_GRAYSCALE);
     Size sz = image.size();
@@ -55,6 +78,16 @@ void process(string name, int distmask, bool gpu) {
     visualise(dt, lm);
 }
 
+/// Compute, visualise and test distance transform with local maxima using OpenCV.
+/**
+  The main goal is to test the correctness of results on CPU and GPU.
+  Elapsed times are recorded and averaged based on REPEAT variable.
+
+  \param[in] name         String indicating image to process
+  \param[in] distmask     Used mask (0 - precise, 3 - 3x3, 5 - 5x5).
+  \param[in] vis          0 - no visualisation, else - visualise
+  \return void
+*/
 void test(string name, int distmask, bool vis) {
 	Mat image = imread(name, IMREAD_GRAYSCALE);
     Size sz = image.size();
@@ -116,7 +149,7 @@ int main(int argc, char const *argv[])
 			distmask = atoi(argv[2]);
 		if(argc > 3)
 			gpu = atoi(argv[3]);
-		
+
 		process(argv[1], distmask, gpu);
 		return 0;
 	} 

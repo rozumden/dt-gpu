@@ -7,16 +7,33 @@
 #include <time.h>
 #include "init.h"
 
+/// surface reference
 surface<void, 2> surfRef5;
+
+/// Device array binded to surface
 cudaArray* cuInArray5;
 
+/// Used 5x5 mask in constant memory on GPU
 __constant__ float mask5[5][5];
 
+/// optimal values for the mask
 float a5 = 1;
 float b5 = 1.4;
 float c5 = 2.1969;
+
+/// Used 5x5 mask which will be copied to GPU
 float tmpMask5[][5] = { {-1,c5,-1,c5,-1}, {c5,b5,a5,b5,c5}, {-1,a5,0,a5,-1},{c5,b5,a5,b5,c5}, {-1,c5,-1,c5,-1}};
 
+
+/// Compute local maxima using surface memory.
+/**
+  Compute local maxima using surface memory.
+
+  \param[out] dst  Output 8bit matrix with positive numbers (here 255) indicating local maxima.
+  \param[in] w     Image widht
+  \param[in] h     Image height
+  \return void
+*/
 __global__ void calcLM_5x5(BYTE *dst, int w, int h){
     int col = blockIdx.x*blockDim.x + threadIdx.x;
     int row = blockIdx.y*blockDim.y + threadIdx.y;
@@ -56,6 +73,16 @@ __global__ void calcLM_5x5(BYTE *dst, int w, int h){
     }
 }
 
+/// Init distance transform.
+/**
+  Distance transform is set to zero for zero pixels 
+  and to infinity for positive pixels. 
+
+  \param[in] src   Source array with 8bit binary image.
+  \param[in] w     Image widht
+  \param[in] h     Image height 
+  \return void
+*/
 __global__ void initDT_5x5(BYTE *src, int w, int h){
     int col = blockIdx.x*blockDim.x + threadIdx.x;
     int row = blockIdx.y*blockDim.y + threadIdx.y;
@@ -70,6 +97,17 @@ __global__ void initDT_5x5(BYTE *src, int w, int h){
     }
 }
 
+
+/// Computer one iteration of distance transform.
+/**
+  Apply mask until all threads in one block converge.
+  If at least one thread changed it value, set done to zero.
+
+  \param[in] w        Image widht
+  \param[in] h        Image height 
+  \param[out] done    Binary variable indicating if blocks converged
+  \return void
+*/
 __global__ void calcDT_5x5(int w, int h, int *done){
     __shared__ int found;
     bool written = true;
@@ -183,7 +221,22 @@ __global__ void calcDT_5x5(int w, int h, int *done){
     }
 }
 
+
+/// Compute distance transform and its local maxima on GPU with 5x5 mask.
+/**
+  The mask is applied in parallel to all pixels until no one changes its value.
+  Distance tranform is stored in surface memory. 
+  calcDT is called iteratively until there is no thread with changed value.
+
+  \param[in] diffData  Source array with 8bit binary image.
+  \param[out] dtData   Output float array with Euclidean distance transform values.
+  \param[out] lmData   Output 8bit array with positive numbers (here 255) indicating local maxima.
+  \param[in] w         Image widht
+  \param[in] h         Image height 
+  \return void
+*/
 void gpuDTLM_5x5(const BYTE *diffData, float *dtData, BYTE *lmData, int w, int h) {
+    /// number of threads per blocks in one dimention
     int TH = 32;
     dim3 dimBlock(TH,TH);
     int DW = (int) ceil(w/(float)TH);

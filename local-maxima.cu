@@ -5,9 +5,22 @@
 #include <cmath>
 #include "init.h"
 
+/// Texture reference 
 texture<float, cudaTextureType2D, cudaReadModeElementType> texRef;
+
+/// Device array binded to texture
 cudaArray *cuArray;
 
+
+/// Compute local maxima using texture memory.
+/**
+  Compute local maxima using texture memory.
+
+  \param[out] dst  Output 8bit matrix with positive numbers (here 255) indicating local maxima.
+  \param[in] w     Image widht
+  \param[in] h     Image height
+  \return void
+*/
 __global__ void findLM(BYTE *dst, int w, int h){
     double col = blockIdx.x*blockDim.x + threadIdx.x;
     double row = blockIdx.y*blockDim.y + threadIdx.y;
@@ -40,7 +53,18 @@ __global__ void findLM(BYTE *dst, int w, int h){
     }
 }
 
+/// Compute local maxima from distance transform using texture memory.
+/**
+  Compute local maxima using texture memory.
+  
+  \param[in] src   Input float matrix with Euclidean distance transform values.
+  \param[out] dst  Output 8bit matrix with positive numbers (here 255) indicating local maxima.
+  \param[in] w     Image widht
+  \param[in] h     Image height
+  \return void
+*/
 void gpuLocalMaxima(const float *src, BYTE *dst, int w, int h){
+    /// number of threads per blocks in one dimention
     int TH = 32;
     dim3 dimBlock(TH,TH);
     int DW = (int) ceil(w/(float)TH);
@@ -50,7 +74,7 @@ void gpuLocalMaxima(const float *src, BYTE *dst, int w, int h){
     int ARRAY_SIZE = w*h;
     BYTE* devDst;
 
-    /// textures
+    /// init textures
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
     cudaMallocArray(&cuArray, &channelDesc, w, h);
     cudaMemcpyToArray(cuArray, 0, 0, src, ARRAY_SIZE*sizeof(float), cudaMemcpyHostToDevice);
@@ -64,6 +88,7 @@ void gpuLocalMaxima(const float *src, BYTE *dst, int w, int h){
 
     cudaMalloc((void **) &devDst, ARRAY_SIZE * sizeof(BYTE));
 
+    /// main kernel
     findLM<<<dimGrid, dimBlock>>>(devDst,w,h);
     CHECK_ERROR(cudaGetLastError());
 

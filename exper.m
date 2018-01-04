@@ -1,3 +1,5 @@
+%%% Matlab file for plotting the experiments.
+
 imgs = {'man.jpg', 'io.png','stripes.jpg','pattern.jpg'};
 
 for i = 1:numel(imgs)

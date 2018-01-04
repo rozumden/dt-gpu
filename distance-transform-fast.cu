@@ -7,6 +7,18 @@
 #include <time.h>
 #include "init.h"
 
+
+/// Compute squared Euclidean distance transform for each column.
+/**
+  Two scans are performed to find squared distance to the closest pixel
+  in the column, which is stored in shared memoty. 
+
+  \param[in] src       Source array with 8bit binary image.
+  \param[out] out      Output int array with squared Euclidean distance transform in columns.
+  \param[in] sizeRow   Image widht
+  \param[in] sizeCol   Image height 
+  \return void
+*/
 __global__ void computeCol(BYTE* src, int* out, int sizeRow, int sizeCol) {
 	extern __shared__ int imgCol []; // allocates shared memory
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -42,6 +54,18 @@ __global__ void computeCol(BYTE* src, int* out, int sizeRow, int sizeCol) {
 	}
 }
 
+
+/// Compute squared Euclidean distance transform for each row.
+/**
+  Two scans are performed to find squared distance to the closest pixel
+  in the row, which is stored in shared memoty. 
+
+  \param[in] out       Output int array with squared Euclidean distance transform in columns.
+  \param[out] res      Output float array with exact Euclidean distance transform.
+  \param[in] sizeRow   Image widht
+  \param[in] sizeCol   Image height 
+  \return void
+*/
 __global__ void computeRow(int* out, float* res, int sizeRow, int sizeCol) {
 	extern __shared__ int imgRow[]; // allocates shared memory
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -72,9 +96,23 @@ __global__ void computeRow(int* out, float* res, int sizeRow, int sizeCol) {
 		}
  		res[y + col] = sqrt((double)value);
 	}
- }
+}
 
+
+/// Compute exact Euclidean distance transform on GPU.
+/**
+  The computation is split into two phases -- for rows and columns.
+  In each phase, two scans are performed to find squared distance to the closest pixel
+  in the row / column. Then, the squared root is taken,
+
+  \param[in] diffData  Source array with 8bit binary image.
+  \param[out] dtData   Output float array with Euclidean distance transform values.
+  \param[in] w         Image widht
+  \param[in] h         Image height 
+  \return void
+*/
 void gpuDTfast(const BYTE *diffData, float *dtData, int w, int h) {
+    /// Maximal number of threads per row/column (can be changed if w/h is lower)
     int MAXTH = 1024;
     int ARRAY_SIZE = w*h;
     

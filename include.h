@@ -1,5 +1,16 @@
-#ifndef FMO_OPENCV_HPP
-#define FMO_OPENCV_HPP
+//----------------------------------------------------------------------------------------
+/**
+ * \file       include.h
+ * \author     Denys Rozumnyi
+ * \date       2018/01/04
+ * \brief      Includes all necessary files for OpenCV (version based) and defines main functions
+ *
+ *  Depending on OpenCV version this files includes all dependencies.
+ *	Additionaly, wrappers for main functions and defined here.
+*/
+//----------------------------------------------------------------------------------------
+#ifndef _INCLUDE_H_
+#define _INCLUDE_H_
 
 #include <opencv2/core/version.hpp>
 
@@ -33,4 +44,4 @@ void dt_fast_gpu(const cv::Mat& diff, cv::Mat& dt);
 void distance_transform(const cv::Mat& srcMat, cv::Mat& dstMat, int mask);
 void local_maxima(const cv::Mat& srcMat, cv::Mat& dstMat);
 
-#endif // FMO_OPENCV_HPP
+#endif // _INCLUDE_H_
